@@ -171,8 +171,10 @@ function clicked(d) {
       .style("left", (d3.event.pageX) + "px")
       .style("top", (d3.event.pageY - 28) + "px")
       .style("z-index", 99);
-   d3.select("#tootlip").transition().duration(300).style("opacity", .9);
-   d3.select("#tooltip").transition().duration(300).style("opacity", .9); //set to 0
+   d3.select("#tooltip").transition()
+      .delay(500)
+      .duration(500)
+      .style("opacity", .9); //set to 0
 
 }
 
