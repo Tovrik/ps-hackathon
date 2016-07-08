@@ -25,14 +25,18 @@
    opacity:0;
 }
 #tooltip table{
-   table-layout:fixed;
+   table-layout:auto;
+   border-spacing: 25px 4px;
+
+
 }
 #tooltip tr td{
-   padding:0;
-   margin:0;
+   right-padding:25px;
+   margin:4;
 }
 #tooltip tr td:nth-child(1){
-   width:50px;
+   width:115px;
+   text-align: left;
 }
 #tooltip tr td:nth-child(2){
    text-align:center;
