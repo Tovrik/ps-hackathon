@@ -262,7 +262,7 @@ function clicked(d) {
    d3.select("#tooltip").html(tooltiphtml("California", d.id))
       .style("left", 0 + "px")
       .style("top", 0 + "px")
-      .style("width", "200px")
+      .style("width", "250px")
       .style("z-index", 99);
    d3.select("#tooltip").transition()
       .delay(500)
@@ -301,6 +301,12 @@ function tooltiphtml(n, d) {
    var numTickets = Math.floor(Math.random() * 5);
    var numTotalTickets = Math.floor(Math.random() * 150);
    var index = Math.floor(Math.random() * names.length-1);
+   var yes = ["Yes", "No"];
+   var products = ["SIS", "SPED", ]
+   var d1 = Math.floor(Math.random() * 4 + 7)
+   var d2 = Math.floor(Math.random() * 3)
+   var d3 =Math.floor(Math.random() * 5)
+   if(d1 === 10) {d2 = 0; d3 = 0;}
    return "<h2>"+n+"</h2>"+
       "<h2>"+ lookupCountyByCode(d)+" County</h2> <h3></h3>"+
       "<h4>Saturation</h4><table>"+
@@ -315,24 +321,16 @@ function tooltiphtml(n, d) {
       "<tr><td>Number of Lifetime Tickets</td><td>"+numTotalTickets+"</td></tr>"+
       "</table>"+
       "<h4>Sales</h4><table>"+
-      "<tr><td>PowerSchool Version</td><td>"+"10.0.0"+"</td></tr>"+
+      "<tr><td>PowerSchool Version</td><td>"+d1+"."+d2+"."+d3+"</td></tr>"+
       "<tr><td>Assigned Sales Contact</td><td>"+names[index+1]+"</td></tr>"+
+      "<tr><td>SIS</td><td>"+yes[Math.floor(Math.random() * 2)]+"</td></tr>"+
+      "<tr><td>SPED</td><td>"+yes[Math.floor(Math.random() * 2)]+"</td></tr>"+
+      "<tr><td>Registration</td><td>"+yes[Math.floor(Math.random() * 2)]+"</td></tr>"+
+      "<tr><td>Assesment/Analytics</td><td>"+yes[Math.floor(Math.random() * 2)]+"</td></tr>"+
+      "<tr><td>Hosted with us</td><td>"+yes[Math.floor(Math.random() * 2)]+"</td></tr>"+
       "</table>";
 }
 
-var sampleData = {};
-["HI", "AK", "FL", "SC", "GA", "AL", "NC", "TN", "RI", "CT", "MA",
-	"ME", "NH", "VT", "NY", "NJ", "PA", "DE", "MD", "WV", "KY", "OH",
-	"MI", "WY", "MT", "ID", "WA", "DC", "TX", "CA", "AZ", "NV", "UT",
-	"CO", "NM", "OR", "ND", "SD", "NE", "IA", "MS", "IN", "IL", "MN",
-	"WI", "MO", "AR", "OK", "KS", "LS", "VA"]
-   .forEach(function(d) {
-      var low=Math.round(100*Math.random()),
-      mid=Math.round(100*Math.random()),
-      high=Math.round(100*Math.random());
-      sampleData[d]={low:d3.min([low,mid,high]), high:d3.max([low,mid,high]),
-      avg:Math.round((low+mid+high)/3), color:d3.interpolate("#ffffcc", "#800026")(low/100)};
-   });
 
 function lookupCountyByCode(id) {
    return countyKeys[id];
