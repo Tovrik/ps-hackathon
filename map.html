@@ -58,10 +58,9 @@
 <script src="http://d3js.org/topojson.v1.min.js"></script>
 <script>
 
-var width = window.innerWidth - 25,
-   height = window.innerHeight - 25,
-    centered,
-    active = d3.select(null);
+var   width = window.innerWidth - 25,
+      height = window.innerHeight - 25,
+      active = d3.select(null);
 
 var rateById = d3.map();
 
@@ -134,7 +133,7 @@ d3.tsv("unemployment.tsv", function(error, d) {
 });
 
 function clicked(d) {
-   console.log(d.id);
+
    if (active.node() === this) return reset();
    active.classed("active", false);
    active = d3.select(this).classed("active", true);
@@ -150,20 +149,6 @@ function clicked(d) {
    svg.transition()
        .duration(750)
        .call(zoom.translate(translate).scale(scale).event);
-
-
-  // g.append("g")
-  //     .attr("class", "counties")
-  //   .selectAll("path")
-  //     .data(county_features)
-  //   .enter().append("path")
-  //     .attr("class", function(d) { return quantize(rateById.get(d.id)); })
-  //     .attr("d", path);
-  //
-  //  g.append("path")
-  //      .datum(county_mesh)
-  //      .attr("class", "county-borders")
-  //      .attr("d", path);
 }
 
 function reset() {

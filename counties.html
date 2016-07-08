@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
+<link rel="stylesheet" href="tooltip.css">
 <style>
 
 .counties {
@@ -14,6 +15,24 @@
 
 .counties .active {
   fill: orange;
+}
+
+.county-borders {
+   fill: none;
+   stroke: #fff;
+   stroke-width: .125px;
+   stroke-linejoin: round;
+   stroke-linecap: round;
+   pointer-events: none;
+}
+
+.state-borders {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.5px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  pointer-events: none;
 }
 
 .background {
@@ -31,20 +50,24 @@
 .q8-9 { fill:rgb(8,48,107); }
 
 </style>
-<svg width="2000" height="2000"></svg>
+<body>
+<div id="tooltip"></div> <!--div to hold tooltip-->
+<div id="SVG"></div>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script src="http://d3js.org/d3.v4.min.js"></script>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/queue.v1.min.js"></script>
 <script src="http://d3js.org/topojson.v1.min.js"></script>
+<script src="index.js"></script>
+<script src="tooltip.js"></script>
 <script>
 
+//define zoom behavior
 var zoom = d3.behavior.zoom()
    .translate([0,0])
    .scale(1)
    .scaleExtent([1,8])
    .on("zoom", zoomed);
-
-
 
 //Declare gloabal variables for heigh, width, and active Polygon
 var width = window.innerWidth - 25,
@@ -70,13 +93,17 @@ var path = d3.geo.path()
 
 
 //Decaration of SVG object
-var svg = d3.select("svg")
+var svg = d3.select("#SVG").append("svg")
+   .attr("width", width)
+   .attr("height", height)
+   .attr("z-index", -1)
    .on("click", stopped, true);
 
 svg.append("rect")
    .attr("class", "background")
    .attr("width", width)
    .attr("height", height)
+   .attr("z-index", -1)
    .on("click", reset);
 
 var g = svg.append("g");
@@ -92,11 +119,13 @@ queue()
     .defer(d3.tsv, "unemployment.tsv", function(d) { rateById.set(d.id, +d.rate); })
     .await(ready);
 
+
+
 //Setup done after files have loaded
 function ready(error, us) {
   if (error) throw error;
 
-  svg.append("g")
+  g.append("g")
       .attr("class", "counties")
     .selectAll("path")
       .data(topojson.feature(us, us.objects.counties).features)
@@ -105,14 +134,19 @@ function ready(error, us) {
       .attr("d", path)
       .on("click", clicked);
 
-  svg.append("path")
+ g.append("path")
+     .datum(topojson.mesh(us, us.objects.counties, function(a, b) { return a !== b; }))
+     .attr("class", "county-borders")
+     .attr("d", path);
+
+  g.append("path")
       .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
-      .attr("class", "states")
+      .attr("class", "state-borders")
       .attr("d", path);
 }
 
+//Clicck handler that centers the map around the clicked object and zooms into it
 function clicked(d) {
-   console.log(d.id);
    if (active.node() === this) return reset();
    active.classed("active", false);
    active = d3.select(this).classed("active", true);
@@ -124,12 +158,25 @@ function clicked(d) {
        y = (bounds[0][1] + bounds[1][1]) / 2,
        scale = Math.max(1, Math.min(8, 0.9 / Math.max(dx / width, dy / height))),
        translate = [width / 2 - scale * x, height / 2 - scale * y];
-
+   console.log(translate);
+   console.log(bounds);
    svg.transition()
        .duration(750)
        .call(zoom.translate(translate).scale(scale).event);
+
+   // graphic.create("test");
+
+   //set the tooltip
+   d3.select("#tooltip").html(tooltiphtml("California", "CA"))
+      .style("left", (d3.event.pageX) + "px")
+      .style("top", (d3.event.pageY - 28) + "px")
+      .style("z-index", 99);
+   d3.select("#tootlip").transition().duration(300).style("opacity", .9);
+   d3.select("#tooltip").transition().duration(300).style("opacity", .9); //set to 0
+
 }
 
+//If you click on the currently active object it zooms out to full view
 function reset() {
    active.classed("active", false);
    active = d3.select(null);
@@ -137,6 +184,12 @@ function reset() {
    svg.transition()
       .duration(750)
       .call(zoom.translate([0,0]).scale(1).event);
+
+   d3.select("#tooltip").transition().duration(500).style("opacity", 0); //set to 0
+}
+
+function updateSVGSize() {
+
 }
 
 function zoomed() {
@@ -144,12 +197,32 @@ function zoomed() {
    g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 }
 
+
 function stopped() {
    if (d3.event.defaultPrevented) d3.event.stopPropagation();
 }
 
-function generateStatistics() {
-
+function tooltiphtml(n,d) {
+   return "<h4>"+n+"</h4><table>"+
+      "<tr><td>Low</td><td>"+(d.low)+"</td></tr>"+
+      "<tr><td>Average</td><td>"+(d.avg)+"</td></tr>"+
+      "<tr><td>High</td><td>"+(d.high)+"</td></tr>"+
+      "</table>";
 }
+
+var sampleData = {};
+["HI", "AK", "FL", "SC", "GA", "AL", "NC", "TN", "RI", "CT", "MA",
+	"ME", "NH", "VT", "NY", "NJ", "PA", "DE", "MD", "WV", "KY", "OH",
+	"MI", "WY", "MT", "ID", "WA", "DC", "TX", "CA", "AZ", "NV", "UT",
+	"CO", "NM", "OR", "ND", "SD", "NE", "IA", "MS", "IN", "IL", "MN",
+	"WI", "MO", "AR", "OK", "KS", "LS", "VA"]
+   .forEach(function(d) {
+      var low=Math.round(100*Math.random()),
+      mid=Math.round(100*Math.random()),
+      high=Math.round(100*Math.random());
+      sampleData[d]={low:d3.min([low,mid,high]), high:d3.max([low,mid,high]),
+      avg:Math.round((low+mid+high)/3), color:d3.interpolate("#ffffcc", "#800026")(low/100)};
+   });
+
 
 </script>
